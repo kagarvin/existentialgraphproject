@@ -1,0 +1,84 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-advanced-reader.ss" "lang")((modname |Eg mockup (but better)|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #t)))
+(require 2htdp/image)
+
+(define-struct unit (name image subs))
+;; Unit is (make-unit String Image ListOfUnit)
+;; interp. A Premise with a letter, image and a list of sub-premises
+
+;; ListOfUnit is one of:
+;;  - empty
+;;  - (cons Unit ListOfUnit)
+;; interp. a list of premeses
+
+(define Z (make-unit "Z" (text "Z" 20 "black") empty))
+(define Y (make-unit "Y" (text "Y" 20 "black") empty))
+(define X (make-unit "X" (text "X" 20 "black") empty))
+(define Q (make-unit "Q" (text "Q" 20 "black") empty))
+(define R (make-unit "R" (text "R" 20 "black") empty))
+(define S (make-unit "S" (text "S" 20 "black") empty))
+
+(define W (make-unit "W"
+                     (text "W" 20 "black")
+                     (list X Y Z)))
+
+(define P (make-unit "P"
+                     (text "P" 20 "black")
+                     (list Q R S)))
+
+(define A (make-unit "A"
+                     (text "A" 20 "black")
+                     (list P W)))
+
+
+#;#;#;
+(define (fn-for-kind k)
+  (cond [(string=? k "University") (...)]
+        [(string=? k "Faculty")    (...)]
+        [(string=? k "Department") (...)]
+        [(string=? k "Division")   (...)]))
+
+(define (fn-for-unit u)
+  (... (unit-name u)
+       (fn-for-kind (unit-kind u))
+       (fn-for-lou (unit-subs u))))
+
+(define (fn-for-lou lou)
+  (cond [(empty? lou) (...)]
+        [else
+         (... (fn-for-unit (first lou))
+              (fn-for-lou (rest lou)))]))
+
+;; Unit -> ListOfString
+;; ListOfUnit -> ListOfString ???
+;; produce names of all the units in a unit
+(check-expect (all-names--lou empty) empty)
+(check-expect (all-names--unit Z)
+              (list "Z"))
+(check-expect (all-names--unit W)
+              (list "W"
+                    "X"
+                    "Y"
+                    "Z"))
+(check-expect (all-names--lou (list Q R S))
+              (list "Q"
+                    "R"
+                    "S"))
+(check-expect (all-names--unit A)
+              (append (list "A")
+                      (all-names--unit P)
+                      (all-names--unit W)))
+
+;(define (all-names--unit u) empty)
+;(define (all-names--lou lou) empty)
+
+(define (all-names--unit u)
+  (cons (unit-name u)
+        (all-names--lou (unit-subs u))))
+
+(define (all-names--lou lou)
+  (cond [(empty? lou) empty]
+        [else
+         (append (all-names--unit (first lou))
+                 (all-names--lou (rest lou)))]))
